@@ -18,6 +18,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+from app.models.mentorship import Mentorship, Milestone, MentorSession
+from app.models.evaluation import Evaluation
 from app.models.user import Base, User
 from app.models.organization import Organization, OrganizationMember
 from app.models.student import StudentProfile, Team
