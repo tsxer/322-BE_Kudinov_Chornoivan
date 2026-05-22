@@ -1,6 +1,7 @@
 import enum
 from sqlalchemy import Column, Integer, String, Boolean, Enum, DateTime
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 class UserRole(str, enum.Enum):
@@ -22,3 +23,4 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    applications = relationship("Application", back_populates="applicant")
