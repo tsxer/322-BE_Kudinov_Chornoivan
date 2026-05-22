@@ -4,6 +4,7 @@ from app.api.auth import router as auth_router
 from app.api.programs import router as programs_router
 from app.api.applications import router as applications_router
 from app.api.students import router as students_router
+from app.api.organizations import router as organizations_router
 
 app = FastAPI(
     title="NTI API",
@@ -23,6 +24,7 @@ app.include_router(auth_router)
 app.include_router(programs_router)
 app.include_router(applications_router)
 app.include_router(students_router)
+app.include_router(organizations_router)
 
 @app.get("/")
 def root():
