@@ -24,3 +24,4 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     applications = relationship("Application", back_populates="applicant")
+    student_profile = relationship("StudentProfile", back_populates="user", uselist=False)
