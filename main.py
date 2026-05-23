@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from app.api.auth import router as auth_router
 from app.api.programs import router as programs_router
 from app.api.applications import router as applications_router
@@ -28,6 +30,17 @@ app.add_middleware(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors_map = {err["loc"][-1]: err["msg"] for err in exc.errors()}
+    return JSONResponse(
+        status_code=422,
+        content={
+            "message": "Validation failed",
+            "errors": errors_map
+        }
+    )
 
 app.include_router(auth_router)
 app.include_router(programs_router)
