@@ -1,4 +1,4 @@
- 
+
 fastapi
 uvicorn[standard]
 sqlalchemy
@@ -12,3 +12,6 @@ pydantic-settings
 python-dotenv
 cloudinary
 fastapi-mail
+slowapi
+aiofiles
+email-validator
