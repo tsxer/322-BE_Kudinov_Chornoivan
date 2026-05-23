@@ -5,11 +5,12 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin, UserResponse
 from app.core.deps import get_current_user
+from app.services.audit_service import log_event
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse)
-def register(data: UserRegister, response: Response, db: Session = Depends(get_db)):
+def register(request: Request, data: UserRegister, response: Response, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -23,15 +24,17 @@ def register(data: UserRegister, response: Response, db: Session = Depends(get_d
     db.refresh(user)
     token = create_access_token({"sub": str(user.id), "role": user.role})
     set_auth_cookie(response, token)
+    log_event(db, action="user.register", actor_id=user.id, resource_type="user", resource_id=user.id, ip_address=request.client.host)
     return user
 
 @router.post("/login", response_model=UserResponse)
-def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
+def login(request: Request, data: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token({"sub": str(user.id), "role": user.role})
     set_auth_cookie(response, token)
+    log_event(db, action="user.login", actor_id=user.id, resource_type="user", resource_id=user.id, ip_address=request.client.host)
     return user
 
 @router.post("/logout")

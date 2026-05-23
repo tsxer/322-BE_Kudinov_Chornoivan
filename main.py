@@ -8,6 +8,7 @@ from app.api.organizations import router as organizations_router
 from app.api.evaluations import router as evaluations_router
 from app.api.mentorships import router as mentorships_router
 from app.api.documents import router as documents_router
+from app.api.admin import router as admin_router
 
 app = FastAPI(
     title="NTI API",
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(admin_router)
 app.include_router(auth_router)
 app.include_router(programs_router)
 app.include_router(applications_router)
