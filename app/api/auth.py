@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -6,6 +7,8 @@ from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin, UserResponse
 from app.core.deps import get_current_user
 from app.services.audit_service import log_event
+from app.services.email_service import send_registration_email
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -21,6 +24,7 @@ def register(request: Request, data: UserRegister, response: Response, db: Sessi
     )
     db.add(user)
     db.commit()
+    asyncio.create_task(send_registration_email(user.email))
     db.refresh(user)
     token = create_access_token({"sub": str(user.id), "role": user.role})
     set_auth_cookie(response, token)

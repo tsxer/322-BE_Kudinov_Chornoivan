@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -6,6 +7,8 @@ from app.core.deps import get_current_user
 from app.models.user import User, UserRole
 from app.models.application import Application, ApplicationStatus
 from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicationStatusUpdate
+from app.services.email_service import send_application_status_email
+
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -47,7 +50,7 @@ def get_application(app_id: int, db: Session = Depends(get_db), current_user: Us
     return application
 
 @router.patch("/{app_id}/status", response_model=ApplicationResponse)
-def update_status(app_id: int, data: ApplicationStatusUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def update_status(app_id: int, data: ApplicationStatusUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     application = db.query(Application).filter(Application.id == app_id).first()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
@@ -57,4 +60,9 @@ def update_status(app_id: int, data: ApplicationStatusUpdate, db: Session = Depe
     application.status = data.status
     db.commit()
     db.refresh(application)
+    asyncio.create_task(send_application_status_email(
+        application.applicant.email,
+        data.status.value,
+        app_id
+    ))
     return application
