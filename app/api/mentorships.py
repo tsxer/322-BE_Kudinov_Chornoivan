@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User, UserRole
@@ -18,8 +18,7 @@ class MentorshipResponse(BaseModel):
     application_id: int
     mentor_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class MilestoneCreate(BaseModel):
     mentorship_id: int
@@ -32,8 +31,7 @@ class MilestoneResponse(BaseModel):
     title: str
     status: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SessionCreate(BaseModel):
     mentorship_id: int
@@ -44,8 +42,7 @@ class SessionResponse(BaseModel):
     mentorship_id: int
     notes: str = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 @router.post("", response_model=MentorshipResponse)
 def create_mentorship(data: MentorshipCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

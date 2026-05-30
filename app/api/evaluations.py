@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User, UserRole
@@ -23,8 +23,7 @@ class EvaluationResponse(BaseModel):
     comment: str = None
     decision: str = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 @router.post("", response_model=EvaluationResponse)
 def create_evaluation(data: EvaluationCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
